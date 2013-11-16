@@ -57,16 +57,17 @@ If lcase(hs.WebLoggedInUser) = "guest" Then Response.Redirect("/unauthorized.asp
         var labels = [];
         for (var i = 0; i < heater.length; i++ ) {
             if (heater[i][1] > 0) {
-            heater[i][1]= 20;
+            heater[i][1]= 14;
             }
             if (heater[i][1] == 0) {
                 heater[i][1]= 10;
             }
         }
-        for (var i = 0; i < temperature.length; i++ ) {
-            if (i % Math.floor(temperature.length/23) == 0) {
-             labels.push(new Date(temperature[i][0]).getHours());
-             
+        var interval = <%= plot_interval %> ;
+        var start = new Date(temperature[0][0]).getHours();
+        for (var i = 0; i < interval; i++ ) {
+            if (i % Math.floor(interval/24) == 0 || interval <24){
+                labels.push((start +i) % 24);
             }
         }
         
@@ -85,7 +86,7 @@ If lcase(hs.WebLoggedInUser) = "guest" Then Response.Redirect("/unauthorized.asp
             .Set('chart.ymax', 30 ) 
             .Set('chart.ymin', 10 ) 
             .Set('chart.background.grid.autofit.numhlines', 20)
-            .Set('chart.background.grid.autofit.numvlines', <%=plot_interval%>*24)
+            .Set('chart.background.grid.autofit.numvlines', <%=plot_interval%>)
             .Set('chart.xmax', temperature[temperature.length-1][0] ) // Important!
             .Set('chart.xmin', temperature[0][0] ) // Important!
         
@@ -95,9 +96,9 @@ If lcase(hs.WebLoggedInUser) = "guest" Then Response.Redirect("/unauthorized.asp
     }
 </script>
 <canvas id='thermostat' width='700' height='500' style="margin: 0 auto;">[No canvas support]</canvas>
-<a href="plot_thermostat.aspx?room=<%=ViewState("room")%>&plot_interval=<%=plot_interval-1%>">shorter</a> | <a href="plot_thermostat.aspx?room=<%=ViewState("room")%>&plot_interval=<%=plot_interval+1%>">longer</a>
+<a href="plot_thermostat.aspx?room=<%=ViewState("room")%>&plot_interval=<%=plot_interval - 24%>">shorter</a> | <a href="plot_thermostat.aspx?room=<%=ViewState("room")%>&plot_interval=<%=plot_interval+24%>">longer</a>
     </div>
-  <script src="https://code.jquery.com/jquery.js"></script>
+  <script src="jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="dist/js/bootstrap.js"></script>
     

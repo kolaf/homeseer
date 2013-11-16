@@ -30,7 +30,7 @@ Function  get_room_data(byval column as string, byval device as string)  as stri
         Dim room = ViewState("room")
 
         If Trim(Request.QueryString("plot_interval")) = "" Then
-            plot_interval = 2
+            plot_interval = 24
         Else
             plot_interval = CInt(Request.QueryString("plot_interval"))
 
@@ -38,7 +38,7 @@ Function  get_room_data(byval column as string, byval device as string)  as stri
     dim thermometer = get_device_room (device, room)
     REM hs.writeLog("plot_thermostat", thermometer)
     Dim strSQL As New System.Text.StringBuilder
-        strSQL.Append("SELECT lastchange as last, " & column & ", devicename FROM readings WHERE  deviceID = '" & thermometer & "' and lastchange >= DATE_SUB(NOW(),INTERVAL " & plot_interval & " DAY) ORDER BY lastchange ASC")
+        strSQL.Append("SELECT lastchange as last, " & column & ", devicename FROM readings WHERE  deviceID = '" & thermometer & "' and lastchange >= DATE_SUB(NOW(),INTERVAL " & plot_interval & " HOUR) ORDER BY lastchange ASC")
     REM hs.writeLog("plot_thermostat", strsql.tostring ())
         Dim dbconn As MySqlConnection = New MySqlConnection("Database=homeseer;Data Source=localhost;User Id=homeseer;Password=homeseer")
     dbconn.Open()
@@ -61,7 +61,9 @@ Function  get_room_data(byval column as string, byval device as string)  as stri
                 output = output & "['" & time.AddMinutes(-1).tostring("s") & "'," & last_value & "],"
             end if
             output = output & "['" & time.tostring("s") & "'," & current_value & "]"
-            
+                If device = "heaters" Then
+                    output = output & ",['" & time.AddMinutes(4).ToString("s") & "'," & current_value & "]"
+                End If
             last_value =current_value
         end if
         

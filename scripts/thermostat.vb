@@ -23,7 +23,7 @@ public function check_error(byval room as string) as integer
         dim index = 0
         dim last_value = 1000
         while reader.read()
-            if reader("number") > last_value then
+            if reader("number") >= last_value then
                 hs.WriteLog("coldcheck", "temp decrease")
                 index = index +1
             else
