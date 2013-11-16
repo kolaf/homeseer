@@ -24,9 +24,11 @@ function  get_device_room(byval  device as string, byval  my_room as string)
     return ""
 end function
 
+    Public plot_interval As Integer
+
 Function  get_room_data(byval column as string, byval device as string)  as string
         Dim room = ViewState("room")
-        Dim plot_interval As Integer
+
         If Trim(Request.QueryString("plot_interval")) = "" Then
             plot_interval = 2
         Else

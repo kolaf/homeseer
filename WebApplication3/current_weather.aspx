@@ -1,6 +1,6 @@
-<%@ Assembly src="basic.vb" %>
+
 <%@ Page Language="vb" AutoEventWireup="false"
-Src="lights_behind.aspx.vb" Inherits="lights_behind" debug="true" %>
+Inherits="fallokken.lights_behind" debug="true" %>
 <!--  Temperature_Plot.ASPX by Steve Anderson (aka Snevl) -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -72,7 +72,7 @@ Src="lights_behind.aspx.vb" Inherits="lights_behind" debug="true" %>
             .Draw();
 
             
-    var gauge = new RGraph.Gauge('windspeed_canvas', 0, 30, <%=convert_double(CDbl(hs.DeviceValueEx("1227")).tostring())%>)
+    var gauge = new RGraph.Gauge('windspeed_canvas', 0, 15, <%=convert_double(CDbl(hs.DeviceValueEx("1227")).tostring())%>)
         
             // Configure the chart to appear as wished
             .Set('chart.title.top', 'Wind speed m/s')

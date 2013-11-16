@@ -1,6 +1,6 @@
-<%@ Assembly src="basic.vb" %>
+
 <%@ Page Language="vb" AutoEventWireup="false"
-Src="plot_thermostat.aspx.vb" Inherits="plot_thermostat" debug="true" %>
+Inherits="fallokken.plot_thermostat" debug="true" %>
 <!--  Temperature_Plot.ASPX by Steve Anderson (aka Snevl) -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -87,11 +87,12 @@ If lcase(hs.WebLoggedInUser) = "guest" Then Response.Redirect("/unauthorized.asp
     }
 </script>
 <canvas id='thermostat' width='700' height='500' style="margin: 0 auto;">[No canvas support]</canvas>
+<a href="plot_thermostat.aspx?room=<%=ViewState("room")%>&plot_interval=<%=plot_interval-1%>">shorter</a> | <a href="plot_thermostat.aspx?room=<%=ViewState("room")%>&plot_interval=<%=plot_interval+1%>">longer</a>
     </div>
   <script src="https://code.jquery.com/jquery.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="dist/js/bootstrap.js"></script>
-
+    
   </body>
   
 </html>
