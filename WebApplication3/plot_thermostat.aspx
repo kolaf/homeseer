@@ -59,14 +59,17 @@ If lcase(hs.WebLoggedInUser) = "guest" Then Response.Redirect("/unauthorized.asp
             if (heater[i][1] > 0) {
             heater[i][1]= 20;
             }
+            if (heater[i][1] == 0) {
+                heater[i][1]= 10;
+            }
         }
         for (var i = 0; i < temperature.length; i++ ) {
-            if (i % Math.floor(temperature.length/3) == 0) {
-             labels.push(temperature[i][0]);
+            if (i % Math.floor(temperature.length/23) == 0) {
+             labels.push(new Date(temperature[i][0]).getHours());
              
             }
         }
-        labels.push(temperature[temperature.length -1][0]);
+        
         // Create the Scatter chart. The arguments are: the canvas ID and the data to be represented on the chart.
         // You can have multiple sets of data if you wish
         var sg = new RGraph.Scatter('thermostat', temperature, target, heater)
@@ -79,8 +82,13 @@ If lcase(hs.WebLoggedInUser) = "guest" Then Response.Redirect("/unauthorized.asp
             .Set('chart.line', true)
             .Set('chart.tickmarks', null)
             .Set('chart.labels', labels)
+            .Set('chart.ymax', 30 ) 
+            .Set('chart.ymin', 10 ) 
+            .Set('chart.background.grid.autofit.numhlines', 20)
+            .Set('chart.background.grid.autofit.numvlines', <%=plot_interval%>*24)
             .Set('chart.xmax', temperature[temperature.length-1][0] ) // Important!
             .Set('chart.xmin', temperature[0][0] ) // Important!
+        
         
             // Now call the .Draw() method to draw the chart.
             .Draw();
