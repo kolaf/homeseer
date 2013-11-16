@@ -116,6 +116,48 @@ with con:
                 heating_start = None
                 heating_stop = None 
         
+# scale
+for room, training in cases.items ():
+    keys=list(k[room])
+    keys.sort()
+    maximum = {}
+    minimum = {}
+    for train in training:
+        for key, value in train["input"].items ():
+            if not key in maximum:
+                maximum [key] = 0
+                minimum [key] = 1000
+            maximum [key] =max(maximum [key], value)
+            minimum [key] =min(minimum [key], value)
+    
+        if not "heating_rate" in maximum:
+            maximum ["heating_rate"] = 0
+            minimum ["heating_rate"] = 1000
+        maximum ["heating_rate"] =max(maximum ["heating_rate"], train["heating_rate"])
+        minimum ["heating_rate"] =min(minimum ["heating_rate"], train["heating_rate"])
+    print maximum
+    print minimum
+    for train in training:
+        for key, value in train["input"].items ():
+            number = 1
+            if maximum [key] != minimum [key]:
+                number = float(value - minimum [key])/(maximum [key] - minimum [key])
+            if number >1:
+                number = 1
+            if number <0:
+                number = 0
+            train["input"] [key] = number
+        key="heating_rate"
+        number = float(train["heating_rate"] - minimum [key])/(maximum [key] - minimum [key])
+        train["heating_rate"] = number
+    output = open ('scaling_' + room +'.txt','w')
+    keys = maximum.keys ()
+    keys.sort ()
+    output.write (",".join([a+ ":" + str(maximum [a]) for a in  keys]  )+ "\n")
+    output.write (",".join([a+ ":" + str(minimum [a]) for a in  keys]  )+ "\n")
+    output.close ()
+    
+    
 repetitions = 1
 for room, training in cases.items ():
     
@@ -131,13 +173,13 @@ for room, training in cases.items ():
     output_keys.write (",".join (keys))
     output_keys.close()
     for c in training:
-        if c["heating_rate"]:
-            for i in range(repetitions):
-                string =" ".join(str(c["input"][f]) for f in keys)
-                print string
-                output.write (string + "\n" )
-                output.write (str(c["heating_rate"]) + "\n")
-                #print answer
+        
+        for i in range(repetitions):
+            string =" ".join(str(c["input"][f]) for f in keys)
+            print string
+            output.write (string + "\n" )
+            output.write (str(c["heating_rate"]) + "\n")
+            #print answer
     output.close ()
     
 for room in cases.keys():
