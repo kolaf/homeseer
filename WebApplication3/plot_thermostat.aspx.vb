@@ -57,17 +57,18 @@ Function  get_room_data(byval column as string, byval device as string)  as stri
             index = index +1
             dim current_value =convert_double(reader(column))
             dim time =DateTime.parse(reader("last"))
-            if device = "heaters" and last_value <> "-1" then
-                output = output & "['" & time.AddMinutes(-1).tostring("s") & "'," & last_value & "],"
-            end if
-            output = output & "['" & time.tostring("s") & "'," & current_value & "]"
                 If device = "heaters" Then
-                    output = output & ",['" & time.AddMinutes(4).ToString("s") & "'," & current_value & "]"
+                    If current_value = 100 Then
+                        last_value = 0
+                    Else
+                        last_value = 100
+                    End If
+                    output = output & "['" & time.AddMinutes(-1).ToString("s") & "'," & last_value & "],"
                 End If
-            last_value =current_value
-        end if
-        
-    end while
+                output = output & "['" & time.ToString("s") & "'," & current_value & "]"
+            End If
+
+        End While
     output = output & "]"
     dbconn.close ()
     return output

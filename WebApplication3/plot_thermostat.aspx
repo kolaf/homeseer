@@ -64,6 +64,8 @@ If lcase(hs.WebLoggedInUser) = "guest" Then Response.Redirect("/unauthorized.asp
                 heater[i][1]= 10;
             }
         }
+        heater.unshift([temperature[0][0], heater[0][1]]);
+        heater.push([temperature[temperature.length -1][0], heater[heater.length -1][1]]);
         var maxline=[];
         var minline=[];
         for (var i = 0; i < target.length; i++ ) {
@@ -88,7 +90,7 @@ If lcase(hs.WebLoggedInUser) = "guest" Then Response.Redirect("/unauthorized.asp
             .Set('chart.grid.color', 'rgba(238,238,238,1)')
             .Set('chart.gutter.left', 30)
             .Set('chart.line', true)
-            .Set('chart.line.colors', ['green','red','red', 'black'])
+            .Set('chart.line.colors', ['green','black','black', 'red'])
             .Set('chart.tickmarks', null)
             .Set('chart.labels', labels)
             .Set('chart.ymax', 30 ) 
@@ -113,4 +115,5 @@ If lcase(hs.WebLoggedInUser) = "guest" Then Response.Redirect("/unauthorized.asp
   </body>
   
 </html>
+
 

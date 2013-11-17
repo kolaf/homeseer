@@ -14,7 +14,7 @@ lookahead = 4
 from pyfann import libfann
 
 room_name=sys.argv[1]
-confidence=sys.argv[2]
+confidence=float(sys.argv[2])
 heater_state =int(sys.argv[3])
 current_temperature =float (sys.argv[4])
 temperatures = [float(d) for d in sys.argv[5:]]
@@ -25,6 +25,8 @@ def calculate_state(heating_rate,start_temperature, heater_on,schedule):
     print  >> sys.stderr, schedule
     print  >> sys.stderr, "start temp " + str(start_temperature) +"\n"
     rate =float(heating_rate)/12
+    if rate<0:
+        rate=0.2
     for counter in range(len(schedule)):
         current_temperature = start_temperature+ (counter*rate)
         if current_temperature <= schedule [counter] - confidence or (current_temperature <= schedule [counter] + confidence and heater_on == 1):# and current_temperature >= schedule [counter] - confidence:
