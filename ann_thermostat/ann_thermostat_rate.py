@@ -8,15 +8,16 @@ import sys
 con = mdb.connect('192.168.1.3', 'homeseer', 'homeseer', 'homeseer')
 f = '%Y-%m-%d %H:%M:%S'
 cases = {}
-confidence = 1
+
 lookahead = 4
 
 from pyfann import libfann
 
 room_name=sys.argv[1]
-heater_state =int(sys.argv[2])
-current_temperature =float (sys.argv[3])
-temperatures = [float(d) for d in sys.argv[4:]]
+confidence=sys.argv[2]
+heater_state =int(sys.argv[3])
+current_temperature =float (sys.argv[4])
+temperatures = [float(d) for d in sys.argv[5:]]
 
 def calculate_state(heating_rate,start_temperature, heater_on,schedule):
     print  >> sys.stderr, "----------------------------------------------------------\n"

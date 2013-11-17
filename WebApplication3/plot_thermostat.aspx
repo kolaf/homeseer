@@ -53,6 +53,7 @@ If lcase(hs.WebLoggedInUser) = "guest" Then Response.Redirect("/unauthorized.asp
         // The datasets as shown on the chart. Each point is an array, described below.
         var temperature = <%=get_room_data("number", "thermometers")  %>;
         var target = <%=get_room_data("target", "thermometers")  %>;
+        var inter = <%=get_room_data("inter", "thermometers")  %>;
         var heater = <%=get_room_data("number", "heaters")  %>;
         var labels = [];
         for (var i = 0; i < heater.length; i++ ) {
@@ -62,6 +63,12 @@ If lcase(hs.WebLoggedInUser) = "guest" Then Response.Redirect("/unauthorized.asp
             if (heater[i][1] == 0) {
                 heater[i][1]= 10;
             }
+        }
+        var maxline=[];
+        var minline=[];
+        for (var i = 0; i < target.length; i++ ) {
+            maxline.push([target[i][0],target[i][1]+inter[i][1]]);
+            minline.push([target[i][0],target[i][1]-inter[i][1]]);
         }
         var interval = <%= plot_interval %> ;
         var start = new Date(temperature[0][0]).getHours();
@@ -73,7 +80,7 @@ If lcase(hs.WebLoggedInUser) = "guest" Then Response.Redirect("/unauthorized.asp
         
         // Create the Scatter chart. The arguments are: the canvas ID and the data to be represented on the chart.
         // You can have multiple sets of data if you wish
-        var sg = new RGraph.Scatter('thermostat', temperature, target, heater)
+        var sg = new RGraph.Scatter('thermostat', temperature, maxline, minline, heater)
         
             // Configure the chart to look as you want it to.
             .Set('chart.background.barcolor1','white')
@@ -81,6 +88,7 @@ If lcase(hs.WebLoggedInUser) = "guest" Then Response.Redirect("/unauthorized.asp
             .Set('chart.grid.color', 'rgba(238,238,238,1)')
             .Set('chart.gutter.left', 30)
             .Set('chart.line', true)
+            .Set('chart.line.colors', ['green','red','red', 'black'])
             .Set('chart.tickmarks', null)
             .Set('chart.labels', labels)
             .Set('chart.ymax', 30 ) 

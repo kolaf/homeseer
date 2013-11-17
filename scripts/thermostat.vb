@@ -1,4 +1,4 @@
-Imports System.Globalization
+﻿Imports System.Globalization
 Imports System.Threading
 Imports System.IO
 Imports System.ComponentModel
@@ -53,6 +53,7 @@ Public Function ann(ByVal room As string, byval heater_status as integer)
     dim remaining =12 - 12*Cint(time.tostring("mm"))/60
     REM hs.WriteLog("ann","remaining " & remaining)
     dim target_string as string = ""
+    dim interval = double_from_string(hs.GetIniSetting(a(i), "interval","1","thermostat.ini"))
     dim i as integer
     for i = 0 to lookahead*12
         dim target =get_temperature_target(room, time.addminutes (i*5))
@@ -68,7 +69,7 @@ Public Function ann(ByVal room As string, byval heater_status as integer)
     Dim nfi As System.Globalization.NumberFormatInfo = New System.Globalization.CultureInfo("en-US", False).NumberFormat
     Try
         compiler.StartInfo.FileName = "c:\Python26\python.exe"
-        compiler.StartInfo.Arguments = "ann_thermostat\ann_thermostat_rate.py " & room & " " & status & " " &  convert_double (get_temperature (room)) & " "  & target_string
+        compiler.StartInfo.Arguments = "ann_thermostat\ann_thermostat_rate.py " & room & " " & interval & " " & status & " " &  convert_double (get_temperature (room)) & " "  & target_string
         compiler.StartInfo.UseShellExecute = False
         compiler.StartInfo.RedirectStandardOutput = True
         compiler.StartInfo.RedirectStandardError = True
@@ -107,6 +108,7 @@ Public Sub Main(ByVal Parms As Object)
         Dim interval as Double = get_interval(a(i))
         Dim pattern As String = "dd.MM.yyyy HH:mm:ss"
         Dim last_change As DateTime=DateTime.ParseExact(hs.DeviceLastChangeRef(heater), pattern, CultureInfo.CurrentCulture)
+        dim holdoff=Cint(hs.GetIniSetting(a(i), "holdoff","60","thermostat.ini"))*60
         dim since_last = (time- last_change).totalseconds
         hs.WriteLog("Thermostat", "Time since last change is " & since_last)
         hs.WriteLog("Thermostat", "Current temperature in room " & a(i) & " is " & temperature & " with target " & current_target & " and interval " & interval)
@@ -122,7 +124,7 @@ Public Sub Main(ByVal Parms As Object)
             end if
         end if
         if decision >= 0.5 and hs.DeviceValue(heater)= 0 then
-            if since_last > 3600 and hs.GetIniSetting(a(i),"failed", "0", "thermostat.ini") = "0" then
+            if since_last > holdoff and hs.GetIniSetting(a(i),"failed", "0", "thermostat.ini") = "0" then
                 hs.SetDeviceValueByRef(heater, 100, True)
                 hs.WriteLog("Thermostat", "Switching on heater in room " & a(i))
                 If temperature < (current_target - interval) then
@@ -136,7 +138,7 @@ Public Sub Main(ByVal Parms As Object)
                 hs.WriteLog("Thermostat", "Wants to turn on, but only " & since_last & " seconds since it was switched off, and failed is " & hs.GetIniSetting(a(i),"failed", "0", "thermostat.ini"))
             end if
         elseif decision < 0.5 and hs.DeviceValue(heater)= 100 then
-            if since_last > 3600 then
+            if since_last > holdoff then
         
                 hs.SetDeviceValueByRef(heater, 0, True)
                 hs.WriteLog("Thermostat", "Switching off heater in room " & a(i))

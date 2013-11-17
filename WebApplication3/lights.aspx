@@ -1,6 +1,6 @@
 
 <%@ Page Language="vb" AutoEventWireup="false"
-Inherits="lights_behind" debug="true" %>
+Inherits="fallokken.lights_behind" debug="true" %>
 
 <!--  Temperature_Plot.ASPX by Steve Anderson (aka Snevl) -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
