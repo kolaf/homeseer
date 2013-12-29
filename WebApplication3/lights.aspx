@@ -54,15 +54,8 @@ Inherits="fallokken.lights_behind" debug="true" %>
 
 
     <div class="row">
-    <h3>Lights </h3>
-    <div class='col-xs-12 col-sm-6 col-md-4'>
-    <p align ='center'>
     
-   
-   <asp:imageButton id="outdoor" text="Outdoor" runat="server" OnClick="outdoor_clicked"/><br><asp:linkButton id="outdoorlb" text="Outdoor" runat="server" OnClick="outdoor_clicked"/>
-
-</p>
-</div>
+    <%=get_all_lights()%>
    
    
 </div>   
@@ -72,7 +65,7 @@ Inherits="fallokken.lights_behind" debug="true" %>
  <hr>
 
   <div class=row collapse-group>
-   <h3>Thermostats</h3>
+   Thermostats<br />
     <p <%=canvas() %> id="viewdetails" align ='center'>
         <input type='hidden' id='temperatures_box' runat='server'/> 
         <canvas id='cvs' width='600' height='250'>[No canvas support]</canvas><br>

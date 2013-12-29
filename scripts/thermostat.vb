@@ -48,12 +48,12 @@ end function
 
 Public Function ann(ByVal room As string, byval heater_status as integer) 
     Dim compiler As New Process()
-    dim lookahead = 4
+    dim lookahead = 7
     Dim time As DateTime = DateTime.Now
     dim remaining =12 - 12*Cint(time.tostring("mm"))/60
     REM hs.WriteLog("ann","remaining " & remaining)
     dim target_string as string = ""
-    dim interval = double_from_string(hs.GetIniSetting(a(i), "interval","1","thermostat.ini"))
+    dim interval = hs.GetIniSetting(room, "interval","1","thermostat.ini")
     dim i as integer
     for i = 0 to lookahead*12
         dim target =get_temperature_target(room, time.addminutes (i*5))

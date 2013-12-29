@@ -32,10 +32,7 @@ def calculate_state(heating_rate,start_temperature, heater_on,schedule):
         if current_temperature <= schedule [counter] - confidence or (current_temperature <= schedule [counter] + confidence and heater_on == 1):# and current_temperature >= schedule [counter] - confidence:
             # print >> sys.stderr, "inside the interval at index " +str(counter) 
             return "1.0"
-        if counter >12*lookahead:
-            # print >> sys.stderr, "Outside lookahead interval, remaining off"
-            return "0.0"
-    # print >> sys.stderr, "remaining off"
+      
     return "0.0"
 
 

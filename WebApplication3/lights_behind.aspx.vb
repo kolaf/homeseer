@@ -149,30 +149,82 @@ sub outdoor_clicked(ByVal sender as Object, e as EventArgs)
     
 end sub
 
-Function get_temperature(Byval room as String) as Double
-    Dim thermometer as String =hs.GetIniSetting(room,"Thermometer","0","thermostat.ini")
-    if thermometer = "0" then
-        hs.WriteLog("Thermostat", "Unknown thermometer for room " & room)
-        return 100.0
-    End If
-    return CDbl(hs.DeviceValueEx(thermometer))
-End Function
+    Function get_all_lights() As String
 
-Function get_temperature_target(Byval room as String, ByVal hour as String, ByVal time as DateTime) as Double
-    Dim current_target_integer as Double
-    Dim dateTimeFormats As DateTimeFormatInfo
-    Dim nfi As System.Globalization.NumberFormatInfo = New System.Globalization.CultureInfo("en-US", False).NumberFormat
-    dateTimeFormats = New CultureInfo("en-US").DateTimeFormat
-    Dim culture As CultureInfo
-    culture = CultureInfo.CreateSpecificCulture("en-US")
-    Dim style As NumberStyles
-    style = NumberStyles.AllowDecimalPoint
-    if hour = -1 then
-        Dim format As String = "HH"
-        hour =time.ToString(format)
-    End if
-    Dim current_target As Double = Convert.ToDouble(hs.GetIniSetting(room,"temperature_" & time.ToString("ddd", dateTimeFormats) & "_" & hour,"0.0","thermostat.ini"),nfi)
-    If current_target = 0.0 Then
+        Dim enumerator
+        Dim device
+        Dim output As String
+        Dim lights As Hashtable
+        lights = New Hashtable
+        enumerator = hs.GetDeviceEnumerator
+        If Not enumerator Is Nothing Then
+        Else
+            hs.WriteLog("Numerator", "invalid object")
+        End If
+
+        While Not enumerator.Finished()
+            If enumerator.CountChanged Then
+                hs.WriteLog("Numerator", "The device count has changed")
+            End If
+            device = enumerator.GetNext()
+            If Not device Is Nothing And device.Device_Type_String(hs) = "AC_MODULE" Then
+                Dim list_for_room As ArrayList
+                Try
+                    list_for_room = lights(device.Location(hs))
+                Catch ex As NullReferenceException
+                    list_for_room = New ArrayList
+
+                End Try
+                If list_for_room Is Nothing Then
+                    list_for_room = New ArrayList
+                End If
+                list_for_room.Add(device)
+                Dim location = device.Location(hs)
+                Try
+                    lights.Add(device.Location(hs), list_for_room)
+                Catch exception As ArgumentException
+                End Try
+            End If
+        End While
+        enumerator = lights.GetEnumerator()
+        While enumerator.MoveNext()
+            output = output & "<div class='col-xs-12 col-sm-4 col-md-3'>" & enumerator.Key & "<p align ='center'>"
+            For i As Integer = 0 To enumerator.value.Count - 1
+                Dim light_switch = enumerator.value(i)
+                'output = output & light_switch.Ref(hs) & " _ " & light_switch.Name(hs) & ": " & light_switch.Device_Type_String(hs) & "<br>"
+                output = output & "<a href ='lights.aspx?light_control=" & light_switch.Ref(hs) & "'><img src='" & hs.DeviceVGP_GetGraphic(light_switch.Ref(hs), hs.DeviceValue(light_switch.Ref(hs))) & "'><br>" & light_switch.Name(hs) & "</a><br>"
+
+            Next i
+            output = output & "</p></div>"
+        End While
+        Return output
+    End Function
+
+
+    Function get_temperature(ByVal room As String) As Double
+        Dim thermometer As String = hs.GetINISetting(room, "Thermometer", "0", "thermostat.ini")
+        If thermometer = "0" Then
+            hs.WriteLog("Thermostat", "Unknown thermometer for room " & room)
+            Return 100.0
+        End If
+        Return CDbl(hs.DeviceValueEx(thermometer))
+    End Function
+
+    Function get_temperature_target(ByVal room As String, ByVal hour As String, ByVal time As DateTime) As Double
+        Dim current_target_integer As Double
+        Dim dateTimeFormats As DateTimeFormatInfo
+        Dim nfi As System.Globalization.NumberFormatInfo = New System.Globalization.CultureInfo("en-US", False).NumberFormat
+        dateTimeFormats = New CultureInfo("en-US").DateTimeFormat
+        Dim culture As CultureInfo
+        culture = CultureInfo.CreateSpecificCulture("en-US")
+        Dim style As NumberStyles
+        style = NumberStyles.AllowDecimalPoint
+        If hour = -1 Then
+            Dim format As String = "HH"
+            hour = time.ToString(format)
+        End If
+        Dim current_target As Double = Convert.ToDouble(hs.GetIniSetting(room, "temperature_" & time.ToString("ddd", dateTimeFormats) & "_" & hour, "0.0", "thermostat.ini"), nfi)
+        If current_target = 0.0 Then
         current_target_integer = 15.0
     End If
     return current_target
@@ -196,20 +248,24 @@ Function thermostat_links ()
         if boxes mod 3 = 0 then
             output = output & "<div class='row'>"
         end if
-        Dim heat as String = hs.GetIniSetting(room,"Heater","0","thermostat.ini")
-        output = output & "<div class='col-xs-12 col-sm-6 col-md-4'><p align ='center'><a href='lights.aspx?room=" & room & "'>" & hs.GetIniSetting(room, "Name", "unknown", "thermostat.ini") & "</a><a href ='lights.aspx?clear_cold=" & room & "'><img src= " & hs.DeviceVGP_GetGraphic(heat,hs.DeviceValue(heat)) & "></a><br>"
-        output = output & "Temperature: " & get_temperature (room) & " -> Target: " & get_temperature_target(room, -1, Datetime.now) & "<br>"
-        for each day in days
-            output = output & "<a href='lights.aspx?room=" & room & "&day=" & day & "'>" & day & "</a> "
-        next day
-        
-        output = output & "</p></div>"
-        if boxes mod 3 = 2 then
-            output = output & "</div>"
-        end if
-        
-        boxes = boxes +1
-    Next room
+            Dim heat As String = hs.GetINISetting(room, "Heater", "0", "thermostat.ini")
+            Dim heat_graphics As String = hs.DeviceVGP_GetGraphic(heat, hs.DeviceValue(heat))
+            If hs.GetINISetting(room, "failed", "0", "thermostat.ini") <> "0" Then
+                heat_graphics = "images/RFXCOM/ico_warn.gif"
+            End If
+            output = output & "<div class='col-xs-12 col-sm-4 col-md-4'><p align ='center'><a href='lights.aspx?room=" & room & "'>" & hs.GetINISetting(room, "Name", "unknown", "thermostat.ini") & "</a><a href ='lights.aspx?clear_cold=" & room & "'><img src= " & heat_graphics & "></a><br>"
+            output = output & "Temperature: " & get_temperature(room) & " -> Target: " & get_temperature_target(room, -1, DateTime.Now) & "<br>"
+            For Each day In days
+                output = output & "<a href='lights.aspx?room=" & room & "&day=" & day & "'>" & day & "</a> "
+            Next day
+
+            output = output & "</p></div>"
+            If boxes Mod 3 = 2 Then
+                output = output & "</div>"
+            End If
+
+            boxes = boxes + 1
+        Next room
     if boxes mod 3 <> 2 then
             output = output & "</div>"
         end if
