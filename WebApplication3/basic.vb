@@ -75,8 +75,10 @@ End Sub
     Public Sub toggle_lights(ByVal light_control As String)
         If hs.DeviceValue(light_control) = 0 Then
             hs.SetDeviceValueByRef(light_control, 100, True)
+            hs.WriteLog("Lights", "switching on")
         Else
             hs.SetDeviceValueByRef(light_control, 0, True)
+            hs.WriteLog("Lights", "switching off")
         End If
         Response.Redirect("/lights.aspx")
     End Sub

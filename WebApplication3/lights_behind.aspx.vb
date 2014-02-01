@@ -163,9 +163,9 @@ end sub
         End If
 
         While Not enumerator.Finished()
-            If enumerator.CountChanged Then
-                hs.WriteLog("Numerator", "The device count has changed")
-            End If
+            'If enumerator.CountChanged Then
+            '    hs.WriteLog("Numerator", "The device count has changed")
+            'End If
             device = enumerator.GetNext()
             If Not device Is Nothing And device.Device_Type_String(hs) = "AC_MODULE" Then
                 Dim list_for_room As ArrayList

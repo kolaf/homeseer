@@ -27,7 +27,7 @@ public function check_error(byval room as string) as integer
                 hs.WriteLog("coldcheck", "temp decrease")
                 index = index +1
             else
-                hs.WriteLog("coldcheck", "temp reset")
+                REM hs.WriteLog("coldcheck", "temp reset")
                 index = 0
             end if
             last_value = reader ("number")
@@ -97,6 +97,10 @@ Public Sub Main(ByVal Parms As Object)
     Dim a() As String
     a= Split (rooms, ",")
     Dim time As DateTime = DateTime.Now
+    Dim reboot As String = hs.GetIniSetting("Global", "reset", "0.0", "thermostat.ini")
+    If reboot = "1.0" Then
+        hs.SaveIniSetting("Global", "reset", "0.0", "thermostat.ini")
+    End If
     Dim i As Integer
     Dim message_base as String = hs.GetIniSetting("Global","aradmin", "", "thermostat.ini") & "&ttl=300&message=note=:="
     Dim webClient As New System.Net.WebClient
@@ -108,7 +112,10 @@ Public Sub Main(ByVal Parms As Object)
         Dim interval as Double = get_interval(a(i))
         Dim pattern As String = "dd.MM.yyyy HH:mm:ss"
         Dim last_change As DateTime=DateTime.ParseExact(hs.DeviceLastChangeRef(heater), pattern, CultureInfo.CurrentCulture)
-        dim holdoff=Cint(hs.GetIniSetting(a(i), "holdoff","60","thermostat.ini"))*60
+        Dim holdoff = CInt(hs.GetIniSetting(a(i), "holdoff", "60", "thermostat.ini")) * 60
+        If reboot = "1.0" Then
+            holdoff = 0
+        End If
         dim since_last = (time- last_change).totalseconds
         hs.WriteLog("Thermostat", "Time since last change is " & since_last)
         hs.WriteLog("Thermostat", "Current temperature in room " & a(i) & " is " & temperature & " with target " & current_target & " and interval " & interval)
@@ -123,40 +130,40 @@ Public Sub Main(ByVal Parms As Object)
                 hs.SetDeviceValueByRef(heater, 0, True)
             end if
         end if
-        if decision >= 0.5 and hs.DeviceValue(heater)= 0 then
-            if since_last > holdoff and hs.GetIniSetting(a(i),"failed", "0", "thermostat.ini") = "0" then
+        If decision >= 0.5 And (hs.DeviceValue(heater) = 0 Or reboot = "1.0") Then
+            If since_last > holdoff And hs.GetIniSetting(a(i), "failed", "0", "thermostat.ini") = "0" Then
                 hs.SetDeviceValueByRef(heater, 100, True)
                 hs.WriteLog("Thermostat", "Switching on heater in room " & a(i))
-                If temperature < (current_target - interval) then
-                
+                If temperature < (current_target - interval) Then
+
                     hs.WriteLog("Thermostat", "Regular aagrees")
-                else
+                Else
                     hs.WriteLog("Thermostat", "Regular disagrees")
-                end if
+                End If
                 Dim result As String = webClient.DownloadString(message_base & time.ToString() & ": Switching on heater in " & a(i) & "(" & temperature & " with target " & current_target & ")")
-            else
-                hs.WriteLog("Thermostat", "Wants to turn on, but only " & since_last & " seconds since it was switched off, and failed is " & hs.GetIniSetting(a(i),"failed", "0", "thermostat.ini"))
-            end if
-        elseif decision < 0.5 and hs.DeviceValue(heater)= 100 then
-            if since_last > holdoff then
-        
+            Else
+                hs.WriteLog("Thermostat", "Wants to turn on, but only " & since_last & " seconds since it was switched off, and failed is " & hs.GetIniSetting(a(i), "failed", "0", "thermostat.ini"))
+            End If
+        ElseIf decision < 0.5 And (hs.DeviceValue(heater) = 100 Or reboot = "1.0") Then
+            If since_last > holdoff Then
+
                 hs.SetDeviceValueByRef(heater, 0, True)
                 hs.WriteLog("Thermostat", "Switching off heater in room " & a(i))
-                If temperature > (current_target - interval) then
-                
+                If temperature > (current_target - interval) Then
+
                     hs.WriteLog("Thermostat", "Regular aagrees")
-                else
+                Else
                     hs.WriteLog("Thermostat", "Regular disagrees")
-                end if
+                End If
                 Dim result As String = webClient.DownloadString(message_base & time.ToString() & ": Switching off heater in " & a(i) & "(" & temperature & " with target " & current_target & ")")
-            else
+            Else
                 hs.WriteLog("Thermostat", "Wants to turn off, but only " & since_last & " seconds since it was switched on")
-            end if
-        REM elseif decision >= 0.5 and hs.DeviceValue(heater) = 100 and temperature > (current_target + interval+1) then
+            End If
+            REM elseif decision >= 0.5 and hs.DeviceValue(heater) = 100 and temperature > (current_target + interval+1) then
             REM hs.SetDeviceValueByRef(heater, 0, True)
             REM hs.WriteLog("Thermostat", "Switching off (override) heater in room " & a(i))
             REM Dim result As String = webClient.DownloadString(message_base & time.ToString() & ": Switching off (override) heater in " & a(i) & "(" & temperature & " with target " & current_target & ")")
-        end if
+        End If
         REM If temperature < (current_target - interval) then
             REM If hs.DeviceValue(heater)= 0 then
                 REM hs.SetDeviceValueByRef(heater, 100, True)
